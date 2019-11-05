@@ -109,21 +109,15 @@ def matrice_de_prediction (pred, df) :
 
 
 
-
-
 #renvoie un vecteur avec toutes les predictions pour une matrice de scores donnée 
 
-def prediction (mat, df) :
-    NbLignes = df.shape [0]
-    prediction = np.zeros (NbLignes)
-    for i in range (NbLignes) :
-        dfligne=df.iloc[i]
-        if int(dfligne["sender_id"]) < 15 : #equipe1
-            prediction [i] = np.argmin (mat[i, :]) + 1
-        else:
-            prediction [i] = np.argmin (mat[i, :]) + 15
-    return prediction
 
+def prediction (mat, df) :   #applique a toutes les lignes 
+    mat = pd.DataFrame(mat)
+    sender = df["sender_id"]
+    mat["sender"] = sender
+    prediction = mat.apply(lambda x: np.argmin(x[:-1]) + shift_equipe_partenaire(x["sender"]) + 1 , axis = 1)
+    return prediction
 
 
 #création variable interception
@@ -173,6 +167,7 @@ def ajout_team_side (df) :
 #fonctions de suppression interception d'un dataframe
 def suppr_interception (df) :
     df = df[df['interception']==0]
+    df = df.reset_index().drop(["index"], axis=1)
     return df
 
 def creation_dataframe (df) :
