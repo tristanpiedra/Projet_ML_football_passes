@@ -2,12 +2,12 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from Scores import *
+from ScoresCopy1 import *
 
 
 #On calcule la distance entre deux joueurs quelconques
-def distance (df, joueur_un, joueur_deux, ligne) : 
-    d = np.sqrt ((df["x_{}".format(int(joueur_un))][ligne] - df["x_{}".format(int(joueur_deux))][ligne])**2 + (df["y_{}".format(int(joueur_un))][ligne] - df["y_{}".format(int(joueur_deux))][ligne])**2)
+def distance (dfligne, joueur_un, joueur_deux) : 
+    d = np.sqrt ((dfligne["x_{}".format(int(joueur_un))] - dfligne["x_{}".format(int(joueur_deux))])**2 + (dfligne["y_{}".format(int(joueur_un))] - dfligne["y_{}".format(int(joueur_deux))])**2)
     return d
 
 #fonction qui renvoie le décalage nécessaire pour balayer l'équipe adverse du passeur 
@@ -26,29 +26,30 @@ def shift_equipe_partenaire (sender) :
 
 
 #On regarde si un adversaire est dans le périmètre ou pas 
-def perimetre (df, sender, receveur, ligne) : 
+def perimetre (dfligne, sender, receveur) : 
     Trouve = False
     for i in range (1 + shift_equipe_adverse (sender), 15 + shift_equipe_adverse (sender)) :
-        if distance(df, receveur, i,ligne) < 700 :
+        if distance(dfligne, receveur, i) < 700 :
             Trouve = True 
+            return Trouve
     return Trouve 
 
 #On regarde combien d'adversaires sont dans le périmètre  
-def nombre_adversaires (df, sender, receveur, ligne) : 
+def nombre_adversaires (dfligne, sender, receveur) : 
     nombre_adversaires = 0
     for i in range (1 + shift_equipe_adverse (sender), 15 + shift_equipe_adverse (sender)) :
-        if distance(df, receveur, i,ligne) < 700:
+        if distance(dfligne, receveur, i) < 700:
             nombre_adversaires += 1
     return nombre_adversaires
 
 
 #Systeme de passe backward/Forward classique 
 
-def DirectionPasse (Ligne, df) :
-    sender = df["sender_id"][Ligne]
-    receiver = df["receiver_id"][Ligne]
-    SenderX = df["x_{}".format(int(sender))] [Ligne]
-    ReceiverX = df["x_{}".format(int(receiver))][Ligne]
+def DirectionPasse (dfligne) :
+    sender = dfligne["sender_id"]
+    receiver = dfligne["receiver_id"]
+    SenderX = dfligne["x_{}".format(int(sender))] 
+    ReceiverX = dfligne["x_{}".format(int(receiver))]
     if sender < 15 :  #equipe a droite 
         if SenderX < ReceiverX :
             Direction = "Backward"
@@ -63,11 +64,11 @@ def DirectionPasse (Ligne, df) :
 
 #Systeme de passe avec ajout de passes laterales
 
-def DirectionPasse_amelioree (Ligne, df) :
-    sender = df["sender_id"][Ligne]
-    receiver = df["receiver_id"][Ligne]
-    SenderX, SenderY = df ["x_{}".format(sender)][Ligne], df ["y_{}".format(sender)][Ligne]
-    ReceiverX, ReceiverY = df["x_{}".format(receiver)][Ligne] , df ["y_{}".format(receiver)] [Ligne]
+def DirectionPasse_amelioree (dfligne) :
+    sender = dfligne["sender_id"]
+    receiver = dfligne["receiver_id"]
+    SenderX, SenderY = dfligne ["x_{}".format(sender)], dfligne ["y_{}".format(sender)]
+    ReceiverX, ReceiverY = dfligne["x_{}".format(receiver)] , dfligne ["y_{}".format(receiver)]
     if sender < 15:  #equipe a droite 
         if np.abs( - SenderX + ReceiverX) > np.abs(ReceiverY - SenderY) :    #passe non laterale
             if SenderX < ReceiverX :
@@ -96,12 +97,13 @@ def matrice_de_prediction (pred, df) :
     NbLignes = df.shape [0]
     ScoreTeamates = np.zeros ((NbLignes, 14))
     for i in range (NbLignes) :
-        sender = df ["sender_id"][i]
+        dfligne=df.iloc[i]
+        sender = int(dfligne ["sender_id"])
         for j in range (1 + shift_equipe_partenaire(sender), 15 + shift_equipe_partenaire(sender)) :
                 if j  == sender:
                     ScoreTeamates [i, (j % 14) - 1] = 1000000   #on fausse le score du passeur
                 else:
-                    ScoreTeamates [i, (j % 14) - 1] = pred (df, sender, j, i)
+                    ScoreTeamates [i, (j % 14) - 1] = pred (dfligne, sender, j)
     return ScoreTeamates
 
 
@@ -115,7 +117,8 @@ def prediction (mat, df) :
     NbLignes = df.shape [0]
     prediction = np.zeros (NbLignes)
     for i in range (NbLignes) :
-        if df ["sender_id"][i] < 15 : #equipe1
+        dfligne=df.iloc[i]
+        if int(dfligne["sender_id"]) < 15 : #equipe1
             prediction [i] = np.argmin (mat[i, :]) + 1
         else:
             prediction [i] = np.argmin (mat[i, :]) + 15
@@ -127,10 +130,11 @@ def prediction (mat, df) :
 def ajout_interception (df) :
     nblignes = df.shape [0]
     interception = np.zeros(nblignes)
-    for i in range(len(df["x_1"])) :
-        if ((df["sender_id"] [i] < 15) and (df["receiver_id"] [i] > 14)):    #sender equipe 1
+    for i in range(nblignes) :
+        dfligne=df.iloc[i]
+        if ((int(dfligne["sender_id"]) < 15) and (int(dfligne["receiver_id"]) > 14)):    #sender equipe 1
             interception [i] = 1
-        if ((df["sender_id"] [i] > 14) and (df["receiver_id"][i] < 15)):    #sender equipe 2
+        if ((int(dfligne["sender_id"]) > 14) and (int(dfligne["receiver_id"]) < 15)):    #sender equipe 2
             interception [i] = 1
     df ["interception"] = interception
     return df
@@ -139,11 +143,12 @@ def ajout_interception (df) :
 #création variable distance de passe
 def ajout_dist_passe (df) :
     NbLignes = df.shape[0]
-    distpasse = np.zeros(len(df["x_1"]))
-    for i in range(len(df["x_1"])):
-        sender = df ["sender_id"][i]
-        receveur = df ["receiver_id"][i]
-        distpasse [i] = distance (df , sender, receveur, i)
+    distpasse = np.zeros(NbLignes)
+    for i in range(NbLignes):
+        dfligne=df.iloc[i]
+        sender = dfligne["sender_id"]
+        receveur = dfligne["receiver_id"]
+        distpasse [i] = distance (dfligne , sender, receveur)
     df["DistPasse"] = distpasse
     return df 
 
@@ -157,7 +162,8 @@ def ajout_team_side (df) :
     NbLignes = df.shape [0]
     senderteamside = ["" for x in range(NbLignes)]
     for i in range(NbLignes):
-        if df ["sender_id"][i] >14 :
+        dfligne=df.iloc[i]
+        if int(dfligne["sender_id"])>14 :
             senderteamside [i] = "Left"
         else:
             senderteamside [i] = "Right"
