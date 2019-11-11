@@ -197,8 +197,23 @@ def ajout_distances_sender (df):
     df["seconde_distance_sender"] = df.apply(lambda line: distances_sender_opponents(line)[1] , axis = 1)
     return df
         
+def distances_receveur (dfligne, receveur):
+    sender = dfligne["sender_id"]
+    liste = []
+    if (sender == receveur):
+        return 0, 0
+    else:
+        for i in range (1 + shift_equipe_adverse (sender), 15 + shift_equipe_adverse (sender)) :
+            liste += [distance(dfligne, receveur, i)]
+        result1 = min(liste)
+        del liste[np.argmin(liste)]
+        result2 = min(liste)
+        return result1, result2
 
-
+def ajout_distances_receveur (df):
+        for i in range(1, 15):
+            df["distances_receveur_{}".format(i)] = df.apply(lambda line: distances_receveur (line, i + shift_equipe_partenaire(line["sender_id"])), axis = 1)
+        return df 
 
 def creation_dataframe (df) :
     
