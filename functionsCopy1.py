@@ -135,7 +135,7 @@ def ajout_interception (df) :
 
 
 #création variable distance de passe
-def ajout_dist_passe (df) :
+'''def ajout_dist_passe (df) :
     NbLignes = df.shape[0]
     distpasse = np.zeros(NbLignes)
     for i in range(NbLignes):
@@ -144,12 +144,12 @@ def ajout_dist_passe (df) :
         receveur = dfligne["receiver_id"]
         distpasse [i] = distance (dfligne , sender, receveur)
     df["DistPasse"] = distpasse
-    return df 
+    return df '''
 
 #création variable temps de passe
-def ajout_temps_passe (df) : 
+'''def ajout_temps_passe (df) : 
     df["temps_passe"] = df["time_end"] - df["time_start"]
-    return df
+    return df '''
 
 #création variable team side
 def ajout_team_side (df) : 
@@ -177,6 +177,29 @@ def suppr_fausses_donnees (df):
     df = df[df["fake"]==False]
     return df
 
+#CREATION DE FEATURES DE L'ARTICLE 
+
+#fonction qui retourne les 2 plus proches adversaires du sender. on l'ajoute avec un apply dans le dataframe. 
+
+def distances_sender_opponents (dfligne):
+    sender = dfligne["sender_id"]
+    liste = []
+    for i in range (1 + shift_equipe_adverse (sender), 15 + shift_equipe_adverse (sender)) :
+        liste += [distance(dfligne, sender, i)]
+    result1 = min(liste)
+    del liste[np.argmin(liste)]
+    result2 = min(liste)
+    return result1, result2
+
+#ajout dans le dataframe
+def ajout_distances_sender (df):
+    df["premiere_distance_sender"] = df.apply(lambda line: distances_sender_opponents(line)[0] , axis = 1)
+    df["seconde_distance_sender"] = df.apply(lambda line: distances_sender_opponents(line)[1] , axis = 1)
+    return df
+        
+
+
+
 def creation_dataframe (df) :
     
     #remplacement des nan
@@ -189,85 +212,32 @@ def creation_dataframe (df) :
     df = suppr_interception (df)
     
     #création variable distance de passe
-    df = ajout_dist_passe (df)
+    #df = ajout_dist_passe (df)
     
     #creation variable temps de passe
-    df = ajout_temps_passe (df)
+    #df = ajout_temps_passe (df)
     
     #creation variable côté
     df = ajout_team_side (df)
     
     #suppression données aberrantes
     df = suppr_fausses_donnees (df)
+    
+    #ajout distances_sender 
+    df = ajout_distances_sender (df)
+    
     #matrices de scores
     mat_score1 = matrice_de_prediction (Score1, df)
     mat_score2 = matrice_de_prediction (Score2, df)
     mat_score3 = matrice_de_prediction (Score3, df)
     mat_score4 = matrice_de_prediction (Score4, df)
     
-    #Variable de prediction score 1
-    df['DistTeamate1']=mat_score1[:,0]
-    df['DistTeamate2']=mat_score1[:,1]
-    df['DistTeamate3']=mat_score1[:,2]
-    df['DistTeamate4']=mat_score1[:,3]
-    df['DistTeamate5']=mat_score1[:,4]
-    df['DistTeamate6']=mat_score1[:,5]
-    df['DistTeamate7']=mat_score1[:,6]
-    df['DistTeamate8']=mat_score1[:,7]
-    df['DistTeamate9']=mat_score1[:,8]
-    df['DistTeamate10']=mat_score1[:,9]
-    df['DistTeamate11']=mat_score1[:,10]
-    df['DistTeamate12']=mat_score1[:,11]
-    df['DistTeamate13']=mat_score1[:,12]
-    df['DistTeamate14']=mat_score1[:,13]
-    #Variable de prediction score 2
-    df['Score2Teamate1']=mat_score2[:,0]
-    df['Score2Teamate2']=mat_score2[:,1]
-    df['Score2Teamate3']=mat_score2[:,2]
-    df['Score2Teamate4']=mat_score2[:,3]
-    df['Score2Teamate5']=mat_score2[:,4]
-    df['Score2Teamate6']=mat_score2[:,5]
-    df['Score2Teamate7']=mat_score2[:,6]
-    df['Score2Teamate8']=mat_score2[:,7]
-    df['Score2Teamate9']=mat_score2[:,8]
-    df['Score2Teamate10']=mat_score2[:,9]
-    df['Score2Teamate11']=mat_score2[:,10]
-    df['Score2Teamate12']=mat_score2[:,11]
-    df['Score2Teamate13']=mat_score2[:,12]
-    df['Score2Teamate14']=mat_score2[:,13]
-    #Variable de prediction score 3
-    
-    df['Score3Teamate1']=mat_score3[:,0]
-    df['Score3Teamate2']=mat_score3[:,1]
-    df['Score3Teamate3']=mat_score3[:,2]
-    df['Score3Teamate4']=mat_score3[:,3]
-    df['Score3Teamate5']=mat_score3[:,4]
-    df['Score3Teamate6']=mat_score3[:,5]
-    df['Score3Teamate7']=mat_score3[:,6]
-    df['Score3Teamate8']=mat_score3[:,7]
-    df['Score3Teamate9']=mat_score3[:,8]
-    df['Score3Teamate10']=mat_score3[:,9]
-    df['Score3Teamate11']=mat_score3[:,10]
-    df['Score3Teamate12']=mat_score3[:,11]
-    df['Score3Teamate13']=mat_score3[:,12]
-    df['Score3Teamate14']=mat_score3[:,13]
-    
-    #Variable de prediction score 4
-    
-    df['Score4Teamate1']=mat_score4[:,0]
-    df['Score4Teamate2']=mat_score4[:,1]
-    df['Score4Teamate3']=mat_score4[:,2]
-    df['Score4Teamate4']=mat_score4[:,3]
-    df['Score4Teamate5']=mat_score4[:,4]
-    df['Score4Teamate6']=mat_score4[:,5]
-    df['Score4Teamate7']=mat_score4[:,6]
-    df['Score4Teamate8']=mat_score4[:,7]
-    df['Score4Teamate9']=mat_score4[:,8]
-    df['Score4Teamate10']=mat_score4[:,9]
-    df['Score4Teamate11']=mat_score4[:,10]
-    df['Score4Teamate12']=mat_score4[:,11]
-    df['Score4Teamate13']=mat_score4[:,12]
-    df['Score4Teamate14']=mat_score4[:,13]
+    #Variables de prediction score 1
+    for i in range(14):
+        df['Score1Teamate_{}'.format(i+1)] = mat_score1[:,i]
+        df['Score2Teamate_{}'.format(i+1)] = mat_score2[:,i]
+        df['Score3Teamate_{}'.format(i+1)] = mat_score3[:,i]
+        df['Score4Teamate_{}'.format(i+1)] = mat_score4[:,i]
     
     #creation variables qui affichent la prédiction
     df["predic1"] = prediction (mat_score1, df)
