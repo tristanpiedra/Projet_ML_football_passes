@@ -26,10 +26,10 @@ def creation_dataframe (df) :
     df = suppr_fausses_donnees (df)
     
     #ajout distances_sender 
-    #df = ajout_distances_sender (df)
+    df = ajout_distances_sender (df)
     
     #ajout distances_receveur 
-    #df = ajout_distances_receveur (df)
+    df = ajout_distances_receveur (df)
     
     
     #matrices de scores
