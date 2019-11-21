@@ -42,6 +42,63 @@ def nombre_adversaires (dfligne, sender, receveur) :
             nombre_adversaires += 1
     return nombre_adversaires
 
+def distance_ligne_passe(dfligne,receveur,adversaire):
+    sender=dfligne['sender_id']
+    receveur=dfligne['receiver_id']
+    Xsender=dfligne["x_{}".format(int(sender))]
+    Ysender=dfligne["y_{}".format(int(sender))]
+    Xreceveur=dfligne["x_{}".format(int(receveur))]
+    Yreceveur=dfligne["y_{}".format(int(receveur))]
+    Xadversaire=dfligne["x_{}".format(int(adversaire))]
+    Yadversaire=dfligne["y_{}".format(int(adversaire))]
+    a = np.array([Xreceveur,Yreceveur])
+    b = np.array([Xsender,Ysender])
+    c = np.array([Xadversaire,Yadversaire])
+
+    ba = a - b
+    bc = c - b
+
+    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+    angle = np.arccos(cosine_angle)
+    return(np.sin(angle)*distance(sender,adversaire) if angle <90 and angle>(-90) else 100000)
+#On regarde si un adversaire est présent sur la ligne de passe
+def adversaire_dans_cone(dfligne,receveur,demiangle,affichage=False):
+    resultat=False
+    sender=dfligne['sender_id']
+    receveur+=shift_equipe_partenaire(sender)
+    Xsender=dfligne["x_{}".format(int(sender))]
+    Ysender=dfligne["y_{}".format(int(sender))]
+    Xreceveur=dfligne["x_{}".format(int(receveur))]
+    Yreceveur=dfligne["y_{}".format(int(receveur))]
+    a = np.array([Xreceveur,Yreceveur])
+    b = np.array([Xsender,Ysender])
+    for i in range(1+shift_equipe_adverse(sender),15+shift_equipe_adverse(sender)):
+        Xadversaire=dfligne["x_{}".format(int(i))]
+        Yadversaire=dfligne["y_{}".format(int(i))]
+
+        c = np.array([Xadversaire,Yadversaire])
+        
+        ba = a - b
+        bc = c - b
+
+        cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+        angle = np.arccos(cosine_angle)
+        if abs(angle)>demiangle:
+            result=False
+        else:
+            result=True
+            break
+    if sender==receveur:
+        result=False
+    if affichage==True:
+        xmin,xmax,ymin,ymax = -5250, 5250, -3400, 3400
+        plt.scatter(Xsender,Ysender, color='blue')
+        plt.scatter(Xreceveur,Yreceveur, color='green')
+        plt.scatter(Xadversaire,Yadversaire, color='red')
+        plt.xlim(xmin,xmax)
+        plt.ylim(ymin,ymax)
+        plt.show()
+    return result
 
 #Systeme de passe backward/Forward classique 
 
@@ -118,6 +175,14 @@ def prediction (mat, df) :   #applique a toutes les lignes
     mat["sender"] = sender
     prediction = mat.apply(lambda x: np.argmin(x[:-1]) + shift_equipe_partenaire(x["sender"]) + 1 , axis = 1)
     return prediction
+
+def Matrice_adversaire_dans_cone(df,demiangle):
+    Nblignes = df.shape [0]
+    MatriceIntercept=np.zeros((Nblignes,14))
+    MatriceIntercept=np.array(MatriceIntercept,dtype=bool)
+    for i in range(1,15):
+        MatriceIntercept[:,i-1]=df.apply(lambda x  : adversaire_dans_cone(x,i,demiangle,False),axis=1)
+    return MatriceIntercept
 
 
 #création variable interception

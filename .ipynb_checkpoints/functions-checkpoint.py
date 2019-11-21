@@ -2,12 +2,12 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from Scores import *
+
 
 
 #On calcule la distance entre deux joueurs quelconques
-def distance (df, joueur_un, joueur_deux, ligne) : 
-    d = np.sqrt ((df["x_{}".format(int(joueur_un))][ligne] - df["x_{}".format(int(joueur_deux))][ligne])**2 + (df["y_{}".format(int(joueur_un))][ligne] - df["y_{}".format(int(joueur_deux))][ligne])**2)
+def distance (dfligne, joueur_un, joueur_deux) : 
+    d = np.sqrt ((dfligne["x_{}".format(int(joueur_un))] - dfligne["x_{}".format(int(joueur_deux))])**2 + (dfligne["y_{}".format(int(joueur_un))] - dfligne["y_{}".format(int(joueur_deux))])**2)
     return d
 
 #fonction qui renvoie le décalage nécessaire pour balayer l'équipe adverse du passeur 
@@ -26,29 +26,87 @@ def shift_equipe_partenaire (sender) :
 
 
 #On regarde si un adversaire est dans le périmètre ou pas 
-def perimetre (df, sender, receveur, ligne) : 
+def perimetre (dfligne, sender, receveur) : 
     Trouve = False
     for i in range (1 + shift_equipe_adverse (sender), 15 + shift_equipe_adverse (sender)) :
-        if distance(df, receveur, i,ligne) < 700 :
+        if distance(dfligne, receveur, i) < 700 :
             Trouve = True 
+            return Trouve
     return Trouve 
 
 #On regarde combien d'adversaires sont dans le périmètre  
-def nombre_adversaires (df, sender, receveur, ligne) : 
+def nombre_adversaires (dfligne, sender, receveur) : 
     nombre_adversaires = 0
     for i in range (1 + shift_equipe_adverse (sender), 15 + shift_equipe_adverse (sender)) :
-        if distance(df, receveur, i,ligne) < 700:
+        if distance(dfligne, receveur, i) < 700:
             nombre_adversaires += 1
     return nombre_adversaires
 
+def distance_ligne_passe(dfligne,receveur,adversaire):
+    sender=dfligne['sender_id']
+    receveur=dfligne['receiver_id']
+    Xsender=dfligne["x_{}".format(int(sender))]
+    Ysender=dfligne["y_{}".format(int(sender))]
+    Xreceveur=dfligne["x_{}".format(int(receveur))]
+    Yreceveur=dfligne["y_{}".format(int(receveur))]
+    Xadversaire=dfligne["x_{}".format(int(adversaire))]
+    Yadversaire=dfligne["y_{}".format(int(adversaire))]
+    a = np.array([Xreceveur,Yreceveur])
+    b = np.array([Xsender,Ysender])
+    c = np.array([Xadversaire,Yadversaire])
+
+    ba = a - b
+    bc = c - b
+
+    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+    angle = np.arccos(cosine_angle)
+    return(np.sin(angle)*distance(sender,adversaire) if angle <90 and angle>(-90) else 100000)
+#On regarde si un adversaire est présent sur la ligne de passe
+def adversaire_dans_cone(dfligne,receveur,demiangle,affichage=False):
+    resultat=False
+    sender=dfligne['sender_id']
+    receveur+=shift_equipe_partenaire(sender)
+    Xsender=dfligne["x_{}".format(int(sender))]
+    Ysender=dfligne["y_{}".format(int(sender))]
+    Xreceveur=dfligne["x_{}".format(int(receveur))]
+    Yreceveur=dfligne["y_{}".format(int(receveur))]
+    a = np.array([Xreceveur,Yreceveur])
+    b = np.array([Xsender,Ysender])
+    for i in range(1+shift_equipe_adverse(sender),15+shift_equipe_adverse(sender)):
+        Xadversaire=dfligne["x_{}".format(int(i))]
+        Yadversaire=dfligne["y_{}".format(int(i))]
+
+        c = np.array([Xadversaire,Yadversaire])
+        
+        ba = a - b
+        bc = c - b
+
+        cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+        angle = np.arccos(cosine_angle)
+        if abs(angle)>demiangle:
+            result=False
+        else:
+            result=True
+            break
+    if sender==receveur:
+        result=False
+    if affichage==True:
+        xmin,xmax,ymin,ymax = -5250, 5250, -3400, 3400
+        plt.scatter(Xsender,Ysender, color='blue')
+        plt.scatter(Xreceveur,Yreceveur, color='green')
+        plt.scatter(Xadversaire,Yadversaire, color='red')
+        plt.xlim(xmin,xmax)
+        plt.ylim(ymin,ymax)
+        plt.show()
+    return result
 
 #Systeme de passe backward/Forward classique 
 
-def DirectionPasse (Ligne, df) :
-    sender = df["sender_id"][Ligne]
-    receiver = df["receiver_id"][Ligne]
-    SenderX = df["x_{}".format(int(sender))] [Ligne]
-    ReceiverX = df["x_{}".format(int(receiver))][Ligne]
+def DirectionPasse (dfligne) :
+    sender = dfligne["sender_id"]
+    receiver = dfligne["receiver_id"]
+    SenderX = dfligne["x_{}".format(int(sender))] 
+    ReceiverX = dfligne["x_{}".format(int(receiver))]
     if sender < 15 :  #equipe a droite 
         if SenderX < ReceiverX :
             Direction = "Backward"
@@ -63,11 +121,11 @@ def DirectionPasse (Ligne, df) :
 
 #Systeme de passe avec ajout de passes laterales
 
-def DirectionPasse_amelioree (Ligne, df) :
-    sender = df["sender_id"][Ligne]
-    receiver = df["receiver_id"][Ligne]
-    SenderX, SenderY = df ["x_{}".format(sender)][Ligne], df ["y_{}".format(sender)][Ligne]
-    ReceiverX, ReceiverY = df["x_{}".format(receiver)][Ligne] , df ["y_{}".format(receiver)] [Ligne]
+def DirectionPasse_amelioree (dfligne) :
+    sender = dfligne["sender_id"]
+    receiver = dfligne["receiver_id"]
+    SenderX, SenderY = dfligne ["x_{}".format(sender)], dfligne ["y_{}".format(sender)]
+    ReceiverX, ReceiverY = dfligne["x_{}".format(receiver)] , dfligne ["y_{}".format(receiver)]
     if sender < 15:  #equipe a droite 
         if np.abs( - SenderX + ReceiverX) > np.abs(ReceiverY - SenderY) :    #passe non laterale
             if SenderX < ReceiverX :
@@ -92,180 +150,137 @@ def DirectionPasse_amelioree (Ligne, df) :
 
 #creation de la matrice de score pour chaque coéquipier du passeur 
 
+
+def matrice_de_prediction_ligne(x,pred,j):
+    sender=x['sender_id']
+    if sender==j+shift_equipe_partenaire(sender):
+        c=100000
+    else:
+        c=pred(x,sender,j+shift_equipe_partenaire(sender))
+    return c
+
 def matrice_de_prediction (pred, df) :
     NbLignes = df.shape [0]
     ScoreTeamates = np.zeros ((NbLignes, 14))
-    for i in range (NbLignes) :
-        sender = df ["sender_id"][i]
-        for j in range (1 + shift_equipe_partenaire(sender), 15 + shift_equipe_partenaire(sender)) :
-                if j  == sender:
-                    ScoreTeamates [i, (j % 14) - 1] = 1000000   #on fausse le score du passeur
-                else:
-                    ScoreTeamates [i, (j % 14) - 1] = pred (df, sender, j, i)
+    for j in range (1, 15) :
+        ScoreTeamates[:,j-1]= df.apply(lambda x : matrice_de_prediction_ligne (x,pred,j),axis=1)
     return ScoreTeamates
-
-
-
-
 
 
 #renvoie un vecteur avec toutes les predictions pour une matrice de scores donnée 
 
-def prediction (mat, df) :
-    NbLignes = df.shape [0]
-    prediction = np.zeros (NbLignes)
-    for i in range (NbLignes) :
-        if df ["sender_id"][i] < 15 : #equipe1
-            prediction [i] = np.argmin (mat[i, :]) + 1
-        else:
-            prediction [i] = np.argmin (mat[i, :]) + 15
+def prediction (mat, df) :   #applique a toutes les lignes 
+    mat = pd.DataFrame(mat)
+    sender = df["sender_id"]
+    mat["sender"] = sender
+    prediction = mat.apply(lambda x: np.argmin(x[:-1]) + shift_equipe_partenaire(x["sender"]) + 1 , axis = 1)
     return prediction
 
+def Matrice_adversaire_dans_cone(df,demiangle):
+    Nblignes = df.shape [0]
+    MatriceIntercept=np.zeros((Nblignes,14))
+    MatriceIntercept=np.array(MatriceIntercept,dtype=bool)
+    for i in range(1,15):
+        MatriceIntercept[:,i-1]=df.apply(lambda x  : adversaire_dans_cone(x,i,demiangle,False),axis=1)
+    return MatriceIntercept
 
 
 #création variable interception
 def ajout_interception (df) :
     nblignes = df.shape [0]
     interception = np.zeros(nblignes)
-    for i in range(len(df["x_1"])) :
-        if ((df["sender_id"] [i] < 15) and (df["receiver_id"] [i] > 14)):    #sender equipe 1
+    for i in range(nblignes) :
+        dfligne=df.iloc[i]
+        if ((int(dfligne["sender_id"]) < 15) and (int(dfligne["receiver_id"]) > 14)):    #sender equipe 1
             interception [i] = 1
-        if ((df["sender_id"] [i] > 14) and (df["receiver_id"][i] < 15)):    #sender equipe 2
+        if ((int(dfligne["sender_id"]) > 14) and (int(dfligne["receiver_id"]) < 15)):    #sender equipe 2
             interception [i] = 1
     df ["interception"] = interception
     return df
 
 
 #création variable distance de passe
-def ajout_dist_passe (df) :
+'''def ajout_dist_passe (df) :
     NbLignes = df.shape[0]
-    distpasse = np.zeros(len(df["x_1"]))
-    for i in range(len(df["x_1"])):
-        sender = df ["sender_id"][i]
-        receveur = df ["receiver_id"][i]
-        distpasse [i] = distance (df , sender, receveur, i)
+    distpasse = np.zeros(NbLignes)
+    for i in range(NbLignes):
+        dfligne=df.iloc[i]
+        sender = dfligne["sender_id"]
+        receveur = dfligne["receiver_id"]
+        distpasse [i] = distance (dfligne , sender, receveur)
     df["DistPasse"] = distpasse
-    return df 
+    return df '''
 
 #création variable temps de passe
-def ajout_temps_passe (df) : 
+'''def ajout_temps_passe (df) : 
     df["temps_passe"] = df["time_end"] - df["time_start"]
-    return df
+    return df '''
 
 #création variable team side
 def ajout_team_side (df) : 
     NbLignes = df.shape [0]
     senderteamside = ["" for x in range(NbLignes)]
     for i in range(NbLignes):
-        if df ["sender_id"][i] >14 :
+        dfligne=df.iloc[i]
+        if int(dfligne["sender_id"])>14 :
             senderteamside [i] = "Left"
         else:
             senderteamside [i] = "Right"
     df ["SenderTeamSide"] = senderteamside 
     return df
 
-#fonctions de suppression interception d'un dataframe
+#fonction de suppression interception d'un dataframe
 def suppr_interception (df) :
     df = df[df['interception']==0]
+    df = df.reset_index().drop(["index"], axis=1)
+    return df  
+
+#fonction qui supprime les fausses donnees (sender = receiver ou sender,receiver = nan)
+def suppr_fausses_donnees (df):
+    df = df[df["sender_id"]!= df ["receiver_id"]]
+    df["fake"] = df.apply(lambda x: x["x_{}".format(int(x["sender_id"]))]==100000 or x["x_{}".format(int(x["receiver_id"]))]==100000, axis = 1)
+    df = df[df["fake"]==False]
+    df = df.reset_index().drop(["index"], axis=1)
     return df
 
-def creation_dataframe (df) :
-    
-    #remplacement des nan
-    df = df.replace(np.nan, 100000)
-    
-    #création variable interception
-    df = ajout_interception (df)
-    
-    #on enlève les interceptions    
-    df = suppr_interception (df)
-    
-    #création variable distance de passe
-    df = ajout_dist_passe (df)
-    
-    #creation variable temps de passe
-    df = ajout_temps_passe (df)
-    
-    #creation variable côté
-    df = ajout_team_side (df)
-    
-    #matrices de scores
-    mat_score1 = matrice_de_prediction (Score1, df)
-    mat_score2 = matrice_de_prediction (Score2, df)
-    mat_score3 = matrice_de_prediction (Score3, df)
-    mat_score4 = matrice_de_prediction (Score4, df)
-    
-    #Variable de prediction score 1
-    df['DistTeamate1']=mat_score1[:,0]
-    df['DistTeamate2']=mat_score1[:,1]
-    df['DistTeamate3']=mat_score1[:,2]
-    df['DistTeamate4']=mat_score1[:,3]
-    df['DistTeamate5']=mat_score1[:,4]
-    df['DistTeamate6']=mat_score1[:,5]
-    df['DistTeamate7']=mat_score1[:,6]
-    df['DistTeamate8']=mat_score1[:,7]
-    df['DistTeamate9']=mat_score1[:,8]
-    df['DistTeamate10']=mat_score1[:,9]
-    df['DistTeamate11']=mat_score1[:,10]
-    df['DistTeamate12']=mat_score1[:,11]
-    df['DistTeamate13']=mat_score1[:,12]
-    df['DistTeamate14']=mat_score1[:,13]
-    #Variable de prediction score 2
-    df['Score2Teamate1']=mat_score2[:,0]
-    df['Score2Teamate2']=mat_score2[:,1]
-    df['Score2Teamate3']=mat_score2[:,2]
-    df['Score2Teamate4']=mat_score2[:,3]
-    df['Score2Teamate5']=mat_score2[:,4]
-    df['Score2Teamate6']=mat_score2[:,5]
-    df['Score2Teamate7']=mat_score2[:,6]
-    df['Score2Teamate8']=mat_score2[:,7]
-    df['Score2Teamate9']=mat_score2[:,8]
-    df['Score2Teamate10']=mat_score2[:,9]
-    df['Score2Teamate11']=mat_score2[:,10]
-    df['Score2Teamate12']=mat_score2[:,11]
-    df['Score2Teamate13']=mat_score2[:,12]
-    df['Score2Teamate14']=mat_score2[:,13]
-    #Variable de prediction score 3
-    
-    df['Score3Teamate1']=mat_score3[:,0]
-    df['Score3Teamate2']=mat_score3[:,1]
-    df['Score3Teamate3']=mat_score3[:,2]
-    df['Score3Teamate4']=mat_score3[:,3]
-    df['Score3Teamate5']=mat_score3[:,4]
-    df['Score3Teamate6']=mat_score3[:,5]
-    df['Score3Teamate7']=mat_score3[:,6]
-    df['Score3Teamate8']=mat_score3[:,7]
-    df['Score3Teamate9']=mat_score3[:,8]
-    df['Score3Teamate10']=mat_score3[:,9]
-    df['Score3Teamate11']=mat_score3[:,10]
-    df['Score3Teamate12']=mat_score3[:,11]
-    df['Score3Teamate13']=mat_score3[:,12]
-    df['Score3Teamate14']=mat_score3[:,13]
-    
-    #Variable de prediction score 4
-    
-    df['Score4Teamate1']=mat_score4[:,0]
-    df['Score4Teamate2']=mat_score4[:,1]
-    df['Score4Teamate3']=mat_score4[:,2]
-    df['Score4Teamate4']=mat_score4[:,3]
-    df['Score4Teamate5']=mat_score4[:,4]
-    df['Score4Teamate6']=mat_score4[:,5]
-    df['Score4Teamate7']=mat_score4[:,6]
-    df['Score4Teamate8']=mat_score4[:,7]
-    df['Score4Teamate9']=mat_score4[:,8]
-    df['Score4Teamate10']=mat_score4[:,9]
-    df['Score4Teamate11']=mat_score4[:,10]
-    df['Score4Teamate12']=mat_score4[:,11]
-    df['Score4Teamate13']=mat_score4[:,12]
-    df['Score4Teamate14']=mat_score4[:,13]
-    
-    #creation variables qui affichent la prédiction
-    df["predic1"] = prediction (mat_score1, df)
-    df["predic2"] = prediction (mat_score2, df)
-    df["predic3"] = prediction (mat_score3, df)
-    df["predic4"] = prediction (mat_score4, df)
-    
+#CREATION DE FEATURES DE L'ARTICLE 
+
+#fonction qui retourne les 2 plus proches adversaires du sender. on l'ajoute avec un apply dans le dataframe. 
+
+def distances_sender_opponents (dfligne):
+    sender = dfligne["sender_id"]
+    liste = []
+    for i in range (1 + shift_equipe_adverse (sender), 15 + shift_equipe_adverse (sender)) :
+        liste += [distance(dfligne, sender, i)]
+    result1 = min(liste)
+    del liste[np.argmin(liste)]
+    result2 = min(liste)
+    return result1, result2
+
+#ajout dans le dataframe
+def ajout_distances_sender (df):
+    df["premiere_distance_sender"] = df.apply(lambda line: distances_sender_opponents(line)[0] , axis = 1)
+    df["seconde_distance_sender"] = df.apply(lambda line: distances_sender_opponents(line)[1] , axis = 1)
     return df
-    
-    
+        
+def distances_receveur (dfligne, receveur):
+    sender = dfligne["sender_id"]
+    liste = []
+    if (sender == receveur):
+        return 0, 0
+    else:
+        for i in range (1 + shift_equipe_adverse (receveur), 15 + shift_equipe_adverse (receveur)) :
+            liste += [distance(dfligne, receveur, i)]
+        result1 = min(liste)
+        del liste[np.argmin(liste)]
+        result2 = min(liste)
+        return result1, result2
+
+def ajout_distances_receveur (df):
+        for i in range(1, 15):
+            df["premiere_distances_receveur_{}".format(i)] = df.apply(lambda line: distances_receveur (line, i + shift_equipe_partenaire(line["sender_id"]))[0], axis = 1)
+            df["seconde_distances_receveur_{}".format(i)] = df.apply(lambda line: distances_receveur (line, i + shift_equipe_partenaire(line["sender_id"]))[1], axis = 1)
+        return df 
+
+
     
