@@ -31,6 +31,8 @@ def creation_dataframe (df) :
     #ajout distances_receveur 
     df = ajout_distances_receveur (df)
     
+    #ajoute distance_ligne_passe
+    df = ajout_distance_ligne_passe (df)
     
     #matrices de scores
     mat_score1 = matrice_de_prediction (Score1, df)
@@ -42,7 +44,8 @@ def creation_dataframe (df) :
     mat_score4 = matrice_de_prediction (Score4, df)
     print("mat4 ok")
     
-    Mat_Intercept=Matrice_adversaire_dans_cone(df,10)
+    #on regarde s'il y a des adversaires dans le cône ou non 
+    Mat_Intercept = Matrice_adversaire_dans_cone(df,30)
     for i in range(14):
         df['AdversaireDansCone_{}'.format(i+1)] = Mat_Intercept[:,i]
     
@@ -60,3 +63,4 @@ def creation_dataframe (df) :
     df["predic4"] = prediction (mat_score4, df)
     
     return df
+

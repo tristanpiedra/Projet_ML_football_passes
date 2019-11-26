@@ -288,13 +288,9 @@ def adversaire_dans_cone (dfligne, receveur, demiangle, affichage = False):
             plt.ylim (ymin, ymax)
             plt.legend()
             plt.show()
-        print(angle)
         if (abs(angle) < demiangle and np.linalg.norm(c-a)<np.linalg.norm(ba)) or np.linalg.norm(c-a)<300 :
             result = True
-            print(result)
             break
-        else:
-            print(result)
     if sender == receveur:
         result = False
     return result
