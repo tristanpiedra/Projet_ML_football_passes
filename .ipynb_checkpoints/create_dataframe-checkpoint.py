@@ -42,7 +42,7 @@ def creation_dataframe (df) :
     mat_score4 = matrice_de_prediction (Score4, df)
     print("mat4 ok")
     
-    Mat_Intercept=Matrice_adversaire_dans_Cone(df,10)
+    Mat_Intercept=Matrice_adversaire_dans_cone(df,10)
     for i in range(14):
         df['AdversaireDansCone_{}'.format(i+1)] = Mat_Intercept[:,i]
     

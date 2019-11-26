@@ -45,7 +45,7 @@ def creation_dataframe (df) :
     print("mat4 ok")
     
     #on regarde s'il y a des adversaires dans le cône ou non 
-    Mat_Intercept = Matrice_adversaire_dans_cone(df,10)
+    Mat_Intercept = Matrice_adversaire_dans_cone(df,30)
     for i in range(14):
         df['AdversaireDansCone_{}'.format(i+1)] = Mat_Intercept[:,i]
     

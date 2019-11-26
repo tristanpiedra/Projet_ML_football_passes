@@ -244,7 +244,7 @@ def distance_ligne_passe (dfligne,receveur):
 
             cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
             angle = np.arccos(cosine_angle)
-            liste += [np.sin(angle) * distance(dfligne, sender, adversaire) if angle < 90 and angle > (-90) else 100000]
+            liste += [np.sin(angle) * distance(dfligne, sender, adversaire) if angle*180/np.pi < 90 and angle*180/np.pi > (-90) else 100000]
         result = min(liste)
     
         return(result)
@@ -259,7 +259,7 @@ def ajout_distance_ligne_passe (df):
 
 #On regarde si un adversaire est présent dans un cône d'un angle minimum par rapport à la ligne de passe
 def adversaire_dans_cone (dfligne, receveur, demiangle, affichage = False):
-    resultat = False
+    result = False
     sender = dfligne['sender_id']
     receveur += shift_equipe_partenaire(sender)
     Xsender = dfligne["x_{}".format(int(sender))]
@@ -278,22 +278,25 @@ def adversaire_dans_cone (dfligne, receveur, demiangle, affichage = False):
         bc = c - b
 
         cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-        angle = np.arccos(cosine_angle)
-        if abs(angle) > demiangle:
-            result = False
-        else:
+        angle = np.arccos(cosine_angle)*180/np.pi
+        if affichage == True:
+            xmin, xmax, ymin, ymax = -5250, 5250, -3400, 3400
+            plt.scatter(Xsender, Ysender, color='blue',label="sender")
+            plt.scatter(Xreceveur, Yreceveur, color='green',label="receveur")
+            plt.scatter(Xadversaire, Yadversaire, color='red',label="adversaire")
+            plt.xlim (xmin, xmax)
+            plt.ylim (ymin, ymax)
+            plt.legend()
+            plt.show()
+        print(angle)
+        if (abs(angle) < demiangle and np.linalg.norm(c-a)<np.linalg.norm(ba)) or np.linalg.norm(c-a)<300 :
             result = True
+            print(result)
             break
+        else:
+            print(result)
     if sender == receveur:
         result = False
-    if affichage == True:
-        xmin, xmax, ymin, ymax = -5250, 5250, -3400, 3400
-        plt.scatter(Xsender, Ysender, color='blue')
-        plt.scatter(Xreceveur, Yreceveur, color='green')
-        plt.scatter(Xadversaire, Yadversaire, color='red')
-        plt.xlim (xmin, xmax)
-        plt.ylim (ymin, ymax)
-        plt.show()
     return result
 
 #construction de la matrice qui indique pour chaque receveur potentiel si un adversaire est présent dans le cône de l'angle voulu (utilise la fonction d'au dessus)
