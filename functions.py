@@ -17,6 +17,11 @@ def shift_equipe_adverse (sender) :
     else:
         return 0
 
+    
+#fonction qui renvoie le décalage nécessaire pour balayer l'équipe du passeur 
+def shift_equipe_partenaire_vecteur (sender) :
+    return np.array([i>14 for i in sender])*14
+
 #fonction qui renvoie le décalage nécessaire pour balayer l'équipe du passeur 
 def shift_equipe_partenaire (sender) :
     if sender < 15:

@@ -17,7 +17,7 @@ def creation_dataframe_regression (df) :
     col = df.columns.tolist()
     col = col[0:2] + [col[-1]] + col[2:-1]
     df = df[col]
-    df ["passe"] = (df["receveur_potentiel"] == (df["receiver_id"]) % 14).astype(int)
+    df ["passe"] = ((df["receveur_potentiel"]+shift_equipe_partenaire_vecteur(df["sender_id"])) == (df["receiver_id"])).astype(int)
     df ["adversaire_dans_cone"] = df ["adversaire_dans_cone"].astype(int)
     x = np.arange(10039) + 1
     x = np.tile(x,14)
