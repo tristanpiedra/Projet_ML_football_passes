@@ -31,7 +31,7 @@ def RandomForest (nbiter, train_proportion):
     data= data.drop(["seconde_distance_sender"], 1)
 
     #scaler = StandardScaler()
-    method = RandomForestClassifier(n_estimators=100, max_features = 2, max_depth = 5, oob_score = True)
+    method = RandomForestClassifier(n_estimators=100, max_features = 2, max_depth = 6, oob_score = True)
 
     n_passes = 10039
     
