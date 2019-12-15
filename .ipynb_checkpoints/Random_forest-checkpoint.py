@@ -31,11 +31,11 @@ def RandomForest (nbiter, train_proportion):
     data= data.drop(["seconde_distance_sender"], 1)
 
     #scaler = StandardScaler()
-    method = RandomForestClassifier(n_estimators=100, max_features = 2, max_depth = 6, oob_score = True)
+    method = RandomForestClassifier(n_estimators=100, max_features = 2, max_depth = 7, oob_score = True)
 
     n_passes = 10039
     
-    
+    matrice_coef = np.zeros((nbiter, 8))
     liste_scores = np.zeros(nbiter)
     
     
@@ -74,7 +74,9 @@ def RandomForest (nbiter, train_proportion):
         proba = rfopt.predict_proba (X_test)
         pred = rfopt.predict (X_test)
         score = rfopt.score(X_test, y_test)
+        coef = method.feature_importances_
         
+        matrice_coef [niter,:] = coef
         
         
 
@@ -107,4 +109,4 @@ def RandomForest (nbiter, train_proportion):
         liste_scores [niter] = taux_reussite
         
         
-    return liste_scores, np.mean(liste_scores)
+    return liste_scores, np.mean(liste_scores), matrice_coef

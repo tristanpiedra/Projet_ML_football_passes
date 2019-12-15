@@ -14,10 +14,10 @@ warnings.filterwarnings("ignore")
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 
-def RandomForest (nbiter, train_proportion):
+def GradientBoosting (nbiter, train_proportion):
 
     data = pd.read_csv("dataframe_regression.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
@@ -31,7 +31,7 @@ def RandomForest (nbiter, train_proportion):
     data= data.drop(["seconde_distance_sender"], 1)
 
     #scaler = StandardScaler()
-    method = RandomForestClassifier(n_estimators=100, max_features = 2, max_depth = 7, oob_score = True)
+    method = GradientBoostingClassifier(n_estimators=100, learning_rate = 0.05, max_depth = 3)
 
     n_passes = 10039
     
@@ -70,10 +70,10 @@ def RandomForest (nbiter, train_proportion):
         X_test = X_test.drop(["receiver_id"], 1)
 
 
-        rfopt = method.fit(X_train, y_train)
-        proba = rfopt.predict_proba (X_test)
-        pred = rfopt.predict (X_test)
-        score = rfopt.score(X_test, y_test)
+        gbopt = method.fit(X_train, y_train)
+        proba = gbopt.predict_proba (X_test)
+        pred = gbopt.predict (X_test)
+        score = gbopt.score(X_test, y_test)
         coef = method.feature_importances_
         
         matrice_coef [niter,:] = coef
