@@ -43,18 +43,21 @@ def creation_dataframe (df) :
     print("mat3 ok")
     mat_score4 = matrice_de_prediction (Score4, df)
     print("mat4 ok")
-    
+    MatDir=matrice_direction_passe(df)
+    print("DirPasse OK")
     #on regarde s'il y a des adversaires dans le cône ou non 
-    Mat_Intercept = Matrice_adversaire_dans_cone(df,30)
-    for i in range(14):
-        df['AdversaireDansCone_{}'.format(i+1)] = Mat_Intercept[:,i]
+    Mat_Intercept = Matrice_adversaire_dans_cone(df,10)
+        
     
     #Variables de prediction score 1
     for i in range(14):
+        df['AdversaireDansCone_{}'.format(i+1)] = Mat_Intercept[:,i]
+        df['DirectionPasse_{}'.format(i+1)] = MatDir[:,i]
         df['Score1Teamate_{}'.format(i+1)] = mat_score1[:,i]
         df['Score2Teamate_{}'.format(i+1)] = mat_score2[:,i]
         df['Score3Teamate_{}'.format(i+1)] = mat_score3[:,i]
         df['Score4Teamate_{}'.format(i+1)] = mat_score4[:,i]
+        
     
     #creation variables qui affichent la prédiction
     df["predic1"] = prediction (mat_score1, df)

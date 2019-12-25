@@ -35,7 +35,7 @@ def RandomForest (nbiter, train_proportion):
 
     n_passes = 10039
     
-    matrice_coef = np.zeros((nbiter, 8))
+    matrice_coef = np.zeros((nbiter, 9))
     liste_scores = np.zeros(nbiter)
     
     

@@ -8,8 +8,8 @@ from functions import *
 def creation_dataframe_regression (df) :
     dataframe = []
     for i in range (1, 15):
-        dataframe.append(df[['sender_id', 'receiver_id', 'Score1Teamate_{}'.format(i), 'Score2Teamate_{}'.format(i), 'Score3Teamate_{}'.format(i), 'Score4Teamate_{}'.format(i), 'premiere_distances_receveur_{}'.format(i), 'seconde_distances_receveur_{}'.format(i), 'premiere_distance_sender', 'seconde_distance_sender', 'distance_ligne_passe_{}'.format(i), 'AdversaireDansCone_{}'.format(i)]])
-        dataframe[i-1] = dataframe[i-1].rename (columns = {"Score1Teamate_{}".format(i) : "score1_distance", "Score2Teamate_{}".format(i) : "score2", "Score3Teamate_{}".format(i) : "score3", "Score4Teamate_{}".format(i) : "score4", "premiere_distances_receveur_{}".format(i) : "premiere_distance_receveur", "seconde_distances_receveur_{}".format(i) : "seconde_distance_receveur", 'distance_ligne_passe_{}'.format(i) : 'distance_ligne_passe', 'AdversaireDansCone_{}'.format(i) : 'adversaire_dans_cone'})
+        dataframe.append(df[['sender_id', 'receiver_id', 'Score1Teamate_{}'.format(i), 'Score2Teamate_{}'.format(i), 'Score3Teamate_{}'.format(i), 'Score4Teamate_{}'.format(i), 'premiere_distances_receveur_{}'.format(i), 'seconde_distances_receveur_{}'.format(i), 'premiere_distance_sender', 'seconde_distance_sender', 'distance_ligne_passe_{}'.format(i), 'AdversaireDansCone_{}'.format(i),'DirectionPasse_{}'.format(i)]])
+        dataframe[i-1] = dataframe[i-1].rename (columns = {"Score1Teamate_{}".format(i) : "score1_distance", "Score2Teamate_{}".format(i) : "score2", "Score3Teamate_{}".format(i) : "score3", "Score4Teamate_{}".format(i) : "score4", "premiere_distances_receveur_{}".format(i) : "premiere_distance_receveur", "seconde_distances_receveur_{}".format(i) : "seconde_distance_receveur", 'distance_ligne_passe_{}'.format(i) : 'distance_ligne_passe', 'AdversaireDansCone_{}'.format(i) : 'adversaire_dans_cone','DirectionPasse_{}'.format(i) : 'Direction_Passe'})
 
     df = pd.concat (dataframe, axis = 0)
     df = df.reset_index().drop(["index"], axis=1)
@@ -19,6 +19,7 @@ def creation_dataframe_regression (df) :
     df = df[col]
     df ["passe"] = ((df["receveur_potentiel"] % 14) == (df["receiver_id"]) % 14).astype(int)
     df ["adversaire_dans_cone"] = df ["adversaire_dans_cone"].astype(int)
+    df ["Direction_Passe"] = df ["Direction_Passe"].astype(int)
     x = np.arange(10039) + 1
     x = np.tile(x,14)
     df["passe_id"] = x

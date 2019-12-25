@@ -5,6 +5,39 @@ import matplotlib.pyplot as plt
 
 
 
+def image(dfligne,affichage=False):
+    image=np.ones((680,1050))*123
+    for i in range(1,15):
+        if dfligne["x_{}".format(i)]!=100000:
+            x,y=int(dfligne["y_{}".format(i)]/10)+340,int(dfligne["x_{}".format(i)]/10)+525
+            print(x,y)
+            image[x-5:x+6,y-5:y+6]=np.zeros((11,11))
+    for i in range(15,29):
+        if dfligne["x_{}".format(i)]!=100000:
+            x,y=int(dfligne["y_{}".format(i)]/10)+340,int(dfligne["x_{}".format(i)]/10)+525
+            print(x,y)
+            image[x-5:x+6,y-5:y+6]=np.ones((11,11))*255
+    if affichage == True:
+        xmin, xmax, ymin, ymax = -5250, 5250, -3400, 3400
+        XBleu=np.zeros(14)
+        XRouge=np.zeros(14)
+        YBleu=np.zeros(14)
+        YRouge=np.zeros(14)
+        for i in range(1,15):
+            XBleu[i-1],YBleu[i-1]=int(dfligne["x_{}".format(i)]),int(dfligne["y_{}".format(i)])
+        for i in range(15,29):
+            XRouge[i-15],YRouge[i-15]=int(dfligne["x_{}".format(i)]),int(dfligne["y_{}".format(i)])
+        plt.scatter(XBleu, YBleu, color='blue',label="Equipe A")
+        plt.scatter(XRouge, YRouge, color='red',label="Equipe B")
+        plt.xlim (xmin, xmax)
+        plt.ylim (ymin, ymax)
+        plt.legend()
+        plt.show()
+    return(np.flip(image,axis=0))        
+        
+
+
+
 #On calcule la distance entre deux joueurs quelconques
 def distance (dfligne, joueur_un, joueur_deux) : 
     d = np.sqrt ((dfligne["x_{}".format(int(joueur_un))] - dfligne["x_{}".format(int(joueur_deux))])**2 + (dfligne["y_{}".format(int(joueur_un))] - dfligne["y_{}".format(int(joueur_deux))])**2)
@@ -51,27 +84,25 @@ def nombre_adversaires (dfligne, sender, receveur) :
 
 
 #Systeme de passe backward/Forward classique : indique si la passe est vers l'avant ou vers l'arrière
-def DirectionPasse (dfligne) :
+def DirectionPasse (dfligne,receiver) :
     sender = dfligne["sender_id"]
-    receiver = dfligne["receiver_id"]
     SenderX = dfligne["x_{}".format(int(sender))] 
     ReceiverX = dfligne["x_{}".format(int(receiver))]
     if sender < 15 :  #equipe a droite 
         if SenderX < ReceiverX :
-            Direction = "Backward"
+            Direction = 0
         else:
-            Direction = "Forward"
+            Direction = 1
     else:  #equipe a gauche
         if SenderX > ReceiverX:
-            Direction = "Backward"
+            Direction = 0
         else:
-            Direction = "Forward"
+            Direction = 1
     return Direction
 
 #Systeme de passe avec ajout de passes laterales
-def DirectionPasse_amelioree (dfligne) :
+def DirectionPasse_amelioree (dfligne,receiver) :
     sender = dfligne["sender_id"]
-    receiver = dfligne["receiver_id"]
     SenderX, SenderY = dfligne ["x_{}".format(sender)], dfligne ["y_{}".format(sender)]
     ReceiverX, ReceiverY = dfligne["x_{}".format(receiver)] , dfligne ["y_{}".format(receiver)]
     if sender < 15:  #equipe a droite 
@@ -92,8 +123,12 @@ def DirectionPasse_amelioree (dfligne) :
             Direction = "Sideways"
     return Direction
 
-
-
+def matrice_direction_passe(df):
+    NbLignes = df.shape [0]
+    matDirPasse=np.zeros((NbLignes,14))
+    for j in range (1, 15) :
+        matDirPasse[:,j-1]= df.apply(lambda x : DirectionPasse (x,j),axis=1)
+    return matDirPasse
 
 
 #creation de la matrice de score pour chaque coéquipier du passeur, on lui passe en argument si on veur que ce soit le score 1, 2, 3 ou 4

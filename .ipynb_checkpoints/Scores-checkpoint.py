@@ -9,31 +9,30 @@ import functions as func
 
 #Calcul de tous les scores pour deux joueurs 
 
-def Score1(df, sender, receveur, ligne) : 
-    d = np.sqrt ((df["x_{}".format(int(sender))][ligne] - df["x_{}".format(int(receveur))][ligne])**2 + (df["y_{}".format(int(sender))][ligne] - df["y_{}".format(int(receveur))][ligne])**2)
+def Score1(dfligne, sender, receveur) : 
+    d = np.sqrt ((dfligne["x_{}".format(int(sender))] - dfligne["x_{}".format(int(receveur))])**2 + (dfligne["y_{}".format(int(sender))] - dfligne["y_{}".format(int(receveur))])**2)
     return d
 
 
 
-def Score2 (df, sender, receveur, ligne) : 
-    score = Score1 (df, sender, receveur,ligne)
-    if func.perimetre (df, sender, receveur, ligne) : 
+def Score2 (dfligne, sender, receveur) : 
+    score = Score1 (dfligne, sender, receveur)
+    if func.perimetre (dfligne, sender, receveur) : 
         score += 900
     return score
 
 
-def Score3(df, sender, receveur, ligne) : 
-    score = Score2(df, sender, receveur,ligne)
-    if func.nombre_adversaires (df, sender, receveur, ligne) >= 2:
+def Score3(dfligne, sender, receveur) : 
+    score = Score2(dfligne, sender, receveur)
+    if func.nombre_adversaires (dfligne, sender, receveur) >= 2:
         score += 55     
     return score
 
-def Score4(df, sender, receveur, ligne) : 
-    SenderX = df ["x_{}".format(sender)][ligne]
-    ReceiverX = df["x_{}".format(receveur)][ligne]
-    score = Score3(df, sender, receveur, ligne)
-    
-    if func.DirectionPasse(ligne, df)=="Backward":
+def Score4(dfligne, sender, receveur) : 
+    SenderX = dfligne["x_{}".format(sender)]
+    ReceiverX = dfligne["x_{}".format(receveur)]
+    score = Score3(dfligne, sender, receveur)
+    if func.DirectionPasse(dfligne,receveur)=="Backward":
         score += 0.1 * np.abs(SenderX - ReceiverX)
     else :
         score -= 0.3 * np.abs(SenderX - ReceiverX)

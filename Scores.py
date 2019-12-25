@@ -32,7 +32,7 @@ def Score4(dfligne, sender, receveur) :
     SenderX = dfligne["x_{}".format(sender)]
     ReceiverX = dfligne["x_{}".format(receveur)]
     score = Score3(dfligne, sender, receveur)
-    if func.DirectionPasse(dfligne)=="Backward":
+    if func.DirectionPasse(dfligne,receveur)=="Backward":
         score += 0.1 * np.abs(SenderX - ReceiverX)
     else :
         score -= 0.3 * np.abs(SenderX - ReceiverX)

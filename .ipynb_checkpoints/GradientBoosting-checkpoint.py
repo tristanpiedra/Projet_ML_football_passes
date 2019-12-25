@@ -22,8 +22,10 @@ def GradientBoosting (nbiter, train_proportion):
     data = pd.read_csv("dataframe_regression.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
     data.drop(["Unnamed: 0"], axis = 1)
+    
 
     col = data.columns.tolist()
+    print(col)
     col = col[1:]
     data = data[col]
     data = data.drop(["sender_id"], 1)
@@ -35,7 +37,7 @@ def GradientBoosting (nbiter, train_proportion):
 
     n_passes = 10039
     
-    matrice_coef = np.zeros((nbiter, 8))
+    matrice_coef = np.zeros((nbiter, 9))
     liste_scores = np.zeros(nbiter)
     
     
