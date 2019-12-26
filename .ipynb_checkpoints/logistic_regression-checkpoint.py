@@ -108,7 +108,7 @@ def regression_logistique (nbiter, train_proportion):
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
         
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba
 
 def regression_logistique_OverSamp (nbiter, train_proportion):
 
@@ -169,7 +169,7 @@ def regression_logistique_OverSamp (nbiter, train_proportion):
         X_test = X_test.drop(["receiver_id"], 1)
 
 
-        method.fit(X_train, y_train)
+        method = method.fit(X_train, y_train)
         proba = method.predict_proba (X_test)
         pred = method.predict (X_test)
         score = method.score(X_test, y_test)

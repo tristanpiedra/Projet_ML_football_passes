@@ -112,4 +112,4 @@ def RandomForest (nbiter, train_proportion):
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
         
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba 
