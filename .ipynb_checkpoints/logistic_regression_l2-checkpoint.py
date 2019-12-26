@@ -12,12 +12,13 @@ import time
 import warnings
 warnings.filterwarnings("ignore")
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
 
 
-def RandomForest (nbiter, train_proportion):
+
+def regression_logistique_l2 (nbiter, train_proportion):
 
     data = pd.read_csv("dataframe_regression.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
@@ -30,8 +31,13 @@ def RandomForest (nbiter, train_proportion):
     data = data.drop(["premiere_distance_sender"], 1)
     data= data.drop(["seconde_distance_sender"], 1)
 
+
+    from sklearn.model_selection import train_test_split
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import StandardScaler
+
     #scaler = StandardScaler()
-    method = RandomForestClassifier(n_estimators=100, max_features = 2, max_depth = 7, oob_score = True)
+    method = LogisticRegression(penalty = "l2", C = 0.1)
 
     n_passes = 10039
     
@@ -70,15 +76,13 @@ def RandomForest (nbiter, train_proportion):
         X_test = X_test.drop(["receiver_id"], 1)
 
 
-        rfopt = method.fit(X_train, y_train)
-        proba = rfopt.predict_proba (X_test)
-        pred = rfopt.predict (X_test)
-        score = rfopt.score(X_test, y_test)
-        coef = rfopt.feature_importances_
+        method = method.fit(X_train, y_train)
+        proba = method.predict_proba (X_test)
+        pred = method.predict (X_test)
+        score = method.score(X_test, y_test)
+        coef = method.coef_
         
         matrice_coef [niter,:] = coef
-        
-        
 
         result = proba[:,1]
 
@@ -106,10 +110,11 @@ def RandomForest (nbiter, train_proportion):
 
         taux_reussite = np.mean ((verif - prediction)%14 == 0)
         
-        liste_scores [niter] = taux_reussite
+        liste_scores[niter] = taux_reussite
         
         moyenne_matrice_coef = np.zeros(9)
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
         
     return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef
+

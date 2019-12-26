@@ -76,7 +76,7 @@ def GradientBoosting (nbiter, train_proportion):
         proba = gbopt.predict_proba (X_test)
         pred = gbopt.predict (X_test)
         score = gbopt.score(X_test, y_test)
-        coef = method.feature_importances_
+        coef = gbopt.feature_importances_
         
         matrice_coef [niter,:] = coef
         
@@ -110,5 +110,8 @@ def GradientBoosting (nbiter, train_proportion):
         
         liste_scores [niter] = taux_reussite
         
+        moyenne_matrice_coef = np.zeros(9)
+        for i in range(9):
+            moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
         
-    return liste_scores, np.mean(liste_scores), matrice_coef
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef

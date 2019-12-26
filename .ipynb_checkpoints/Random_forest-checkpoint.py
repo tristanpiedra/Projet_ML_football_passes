@@ -74,7 +74,7 @@ def RandomForest (nbiter, train_proportion):
         proba = rfopt.predict_proba (X_test)
         pred = rfopt.predict (X_test)
         score = rfopt.score(X_test, y_test)
-        coef = method.feature_importances_
+        coef = rfopt.feature_importances_
         
         matrice_coef [niter,:] = coef
         

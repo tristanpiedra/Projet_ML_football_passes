@@ -18,7 +18,7 @@ from sklearn.model_selection import GridSearchCV
 
 
 
-def regression_logistique_optimisee (nbiter, train_proportion):
+def regression_logistique_l2 (nbiter, train_proportion):
 
     data = pd.read_csv("dataframe_regression.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
@@ -31,12 +31,17 @@ def regression_logistique_optimisee (nbiter, train_proportion):
     data = data.drop(["premiere_distance_sender"], 1)
     data= data.drop(["seconde_distance_sender"], 1)
 
+
+    from sklearn.model_selection import train_test_split
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import StandardScaler
+
     #scaler = StandardScaler()
-    
+    method = LogisticRegression(penalty = "l2", C = 0.1)
 
     n_passes = 10039
     
-    
+    matrice_coef = np.zeros((nbiter, 9))
     liste_scores = np.zeros(nbiter)
     
     
@@ -70,16 +75,15 @@ def regression_logistique_optimisee (nbiter, train_proportion):
         X_test = X_test.drop(["receveur_potentiel"], 1)
         X_test = X_test.drop(["receiver_id"], 1)
 
-        param=[{"C":[2.5,2.7,3,3.5,3.8,4,4.2,4.5,4.7]}]
-        logit = GridSearchCV(LogisticRegression(penalty="l1"), param, cv=5, n_jobs = -1)
-        logitopt = logit.fit(X_train, y_train)
-        proba = logitopt.predict_proba (X_test)
-        pred = logitopt.predict (X_test)
-        score = logitopt.score(X_test, y_test)
+
+        method = method.fit(X_train, y_train)
+        proba = method.predict_proba (X_test)
+        pred = method.predict (X_test)
+        score = method.score(X_test, y_test)
+        coef = method.coef_
         
-        
-        
-        
+        matrice_coef [niter,:] = coef
+
         result = proba[:,1]
 
         #on recupere dans prediction_indice les indices des lignes du dataframe test ou il y a la proba max 
@@ -108,6 +112,9 @@ def regression_logistique_optimisee (nbiter, train_proportion):
         
         liste_scores[niter] = taux_reussite
         
+        moyenne_matrice_coef = np.zeros(9)
+        for i in range(9):
+            moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
         
-    return liste_scores, np.mean(liste_scores)
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef
 

@@ -29,7 +29,7 @@ def regression_logistique (nbiter, train_proportion):
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = LogisticRegression()
+    method = LogisticRegression(penalty = "l1", C = 3.5)
 
     n_passes = 10039
     
@@ -68,7 +68,7 @@ def regression_logistique (nbiter, train_proportion):
         X_test = X_test.drop(["receiver_id"], 1)
 
 
-        method.fit(X_train, y_train)
+        method = method.fit(X_train, y_train)
         proba = method.predict_proba (X_test)
         pred = method.predict (X_test)
         score = method.score(X_test, y_test)
@@ -104,8 +104,11 @@ def regression_logistique (nbiter, train_proportion):
         
         liste_scores[niter] = taux_reussite
         
+        moyenne_matrice_coef = np.zeros(9)
+        for i in range(9):
+            moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
         
-    return liste_scores, np.mean(liste_scores), matrice_coef
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef
 
 def regression_logistique_OverSamp (nbiter, train_proportion):
 
