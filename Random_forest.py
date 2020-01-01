@@ -19,7 +19,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 def RandomForest (nbiter, train_proportion):
 
-    data = pd.read_csv("dataframe_regression.csv")
+    data = pd.read_csv("dataframe_regression_centre.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
     data.drop(["Unnamed: 0"], axis = 1)
 
@@ -31,7 +31,7 @@ def RandomForest (nbiter, train_proportion):
     data= data.drop(["seconde_distance_sender"], 1)
 
     #scaler = StandardScaler()
-    method = RandomForestClassifier(n_estimators=100, max_features = 2, max_depth = 7, oob_score = True)
+    method = RandomForestClassifier(n_estimators=100, max_features = 3, max_depth = 7, oob_score = True)
 
     n_passes = 10039
     

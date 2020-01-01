@@ -17,9 +17,12 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import GradientBoostingClassifier
 
 
+
+#quand on centre LR = 0.1, sinon LR = 0.05
+
 def GradientBoosting (nbiter, train_proportion):
 
-    data = pd.read_csv("dataframe_regression.csv")
+    data = pd.read_csv("dataframe_regression_centre.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
     data.drop(["Unnamed: 0"], axis = 1)
     
@@ -33,7 +36,7 @@ def GradientBoosting (nbiter, train_proportion):
     data= data.drop(["seconde_distance_sender"], 1)
 
     #scaler = StandardScaler()
-    method = GradientBoostingClassifier(n_estimators=100, learning_rate = 0.05, max_depth = 3)
+    method = GradientBoostingClassifier(n_estimators=100, learning_rate = 0.1, max_depth = 3)
 
     n_passes = 10039
     

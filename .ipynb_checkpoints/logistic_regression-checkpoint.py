@@ -12,7 +12,7 @@ import time
 
 def regression_logistique (nbiter, train_proportion):
 
-    data = pd.read_csv("dataframe_regression.csv")
+    data = pd.read_csv("dataframe_regression_centre.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
     data.drop(["Unnamed: 0"], axis = 1)
 
