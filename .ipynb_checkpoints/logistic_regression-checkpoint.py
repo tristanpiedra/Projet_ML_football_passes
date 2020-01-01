@@ -35,7 +35,7 @@ def regression_logistique (nbiter, train_proportion):
     
     matrice_coef = np.zeros((nbiter, 9))
     liste_scores = np.zeros(nbiter)
-    
+    table = []
     
     
     for niter in range (nbiter):
@@ -67,12 +67,14 @@ def regression_logistique (nbiter, train_proportion):
         X_test = X_test.drop(["receveur_potentiel"], 1)
         X_test = X_test.drop(["receiver_id"], 1)
 
-
+        
         method = method.fit(X_train, y_train)
         proba = method.predict_proba (X_test)
         pred = method.predict (X_test)
         score = method.score(X_test, y_test)
         coef = method.coef_
+        
+        table += [pd.crosstab(pred, y_test)]
         
         matrice_coef [niter,:] = coef
 
@@ -107,8 +109,10 @@ def regression_logistique (nbiter, train_proportion):
         moyenne_matrice_coef = np.zeros(9)
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
+    
+    moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
         
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
 
 def regression_logistique_OverSamp (nbiter, train_proportion):
 

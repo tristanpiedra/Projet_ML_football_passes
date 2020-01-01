@@ -6,7 +6,6 @@ from functions import *
 from Scores import *
 from create_dataframe import * 
 from create_dataframe_regression import * 
-from logistic_regression import *
 from numpy.random import *
 import time 
 import warnings
