@@ -6,17 +6,19 @@ import matplotlib.pyplot as plt
 
 
 def image(dfligne,affichage=False):
-    image=np.ones((680,1050))*123
+    image=np.zeros((680,1050,3))
     for i in range(1,15):
         if dfligne["x_{}".format(i)]!=100000:
             x,y=int(dfligne["y_{}".format(i)]/10)+340,int(dfligne["x_{}".format(i)]/10)+525
-            print(x,y)
-            image[x-5:x+6,y-5:y+6]=np.zeros((11,11))
+            image[x-5:x+6,y-5:y+6,0]=np.ones((11,11))*255
     for i in range(15,29):
         if dfligne["x_{}".format(i)]!=100000:
             x,y=int(dfligne["y_{}".format(i)]/10)+340,int(dfligne["x_{}".format(i)]/10)+525
             print(x,y)
-            image[x-5:x+6,y-5:y+6]=np.ones((11,11))*255
+            image[x-5:x+6,y-5:y+6,1]=np.ones((11,11))*255
+    sender=int(dfligne['sender_id'])
+    x,y=int(dfligne["y_{}".format(sender)]/10)+340,int(dfligne["x_{}".format(sender)]/10)+525
+    image[x-5:x+6,y-5:y+6,2]=np.ones((11,11))*255
     if affichage == True:
         xmin, xmax, ymin, ymax = -5250, 5250, -3400, 3400
         XBleu=np.zeros(14)

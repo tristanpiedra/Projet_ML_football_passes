@@ -114,12 +114,13 @@ def regression_logistique (nbiter, train_proportion):
         
     return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
 
-def regression_logistique_OverSamp (nbiter, train_proportion):
-
-    data = pd.read_csv("dataframe_regression_OverSamp.csv")
+def regression_logistique_OverSamp (nbiter, train_proportion, centered=False):
+    if centered==False:
+        data = pd.read_csv("dataframe_regression.csv")
+    else:
+        data = pd.read_csv("dataframe_regression_centre.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
     data.drop(["Unnamed: 0"], axis = 1)
-    data=data.drop(["Unnamed: 0.1"], axis = 1)
 
     col = data.columns.tolist()
     col = col[1:]
@@ -134,12 +135,14 @@ def regression_logistique_OverSamp (nbiter, train_proportion):
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = LogisticRegression()
+    method = LogisticRegression(penalty = "l1", C = 3.5)
     
     n_passes = 10039
     
     matrice_coef = np.zeros((nbiter, 9))
     liste_scores = np.zeros(nbiter)
+    
+    table=[]
     
     
     
@@ -157,15 +160,16 @@ def regression_logistique_OverSamp (nbiter, train_proportion):
         X_test = data [ ~data["passe_id"].isin(liste_passes_train)]
         y_test = data [ ~data["passe_id"].isin(liste_passes_train)] ["passe"]
         #X_train, X_test, y_train, y_test = train_test_split(data, Y, test_size=0.2, random_state=37)
-
-
+        from imblearn.over_sampling import SMOTE, ADASYN
+        X_resampled, y_resampled = SMOTE().fit_resample(X_train, y_train)
+        print(sorted(Counter(y_resampled).items()))
         vect_receveur_potentiel = X_test["receveur_potentiel"]
         vect_vrai_receveur = X_test ["receiver_id"]
 
-        X_train = X_train.drop(["passe"], 1)
-        X_train = X_train.drop(["passe_id"], 1)
-        X_train = X_train.drop(["receveur_potentiel"], 1)
-        X_train = X_train.drop(["receiver_id"], 1)
+        X_resampled = X_resampled.drop(["passe"], 1)
+        X_resampled = X_resampled.drop(["passe_id"], 1)
+        X_resampled = X_resampled.drop(["receveur_potentiel"], 1)
+        X_resampled = X_resampled.drop(["receiver_id"], 1)
 
         X_test = X_test.drop(["passe"], 1)
         X_test = X_test.drop(["passe_id"], 1)
@@ -173,11 +177,13 @@ def regression_logistique_OverSamp (nbiter, train_proportion):
         X_test = X_test.drop(["receiver_id"], 1)
 
 
-        method = method.fit(X_train, y_train)
+        method = method.fit(X_resampled, y_resampled)
         proba = method.predict_proba (X_test)
         pred = method.predict (X_test)
         score = method.score(X_test, y_test)
         coef = method.coef_
+        
+        table += [pd.crosstab(pred, y_test)]
         
         matrice_coef [niter,:] = coef
 
@@ -209,8 +215,13 @@ def regression_logistique_OverSamp (nbiter, train_proportion):
         
         liste_scores[niter] = taux_reussite
         
+        moyenne_matrice_coef = np.zeros(9)
+        for i in range(9):
+            moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
+    
+    moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
         
-    return liste_scores, np.mean(liste_scores), matrice_coef
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
 
 
 
