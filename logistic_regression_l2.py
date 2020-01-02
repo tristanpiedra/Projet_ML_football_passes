@@ -16,6 +16,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 
 
+#Quand on centre pas C = 0.1, sinon C = 2
+
 
 def regression_logistique_l2 (nbiter, train_proportion):
 
@@ -36,7 +38,7 @@ def regression_logistique_l2 (nbiter, train_proportion):
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = LogisticRegression(penalty = "l2", C = 0.1)
+    method = LogisticRegression(penalty = "l2", C = 2)
 
     n_passes = 10039
     
