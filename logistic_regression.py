@@ -13,7 +13,7 @@ import time
 #Quand on ne centre pas C = 3.5 sinon C = 5
 def regression_logistique (nbiter, train_proportion):
 
-    data = pd.read_csv("dataframe_regression_centre.csv")
+    data = pd.read_csv("dataframe_regression.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
     data.drop(["Unnamed: 0"], axis = 1)
 
@@ -30,7 +30,7 @@ def regression_logistique (nbiter, train_proportion):
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = LogisticRegression(penalty = "l1", C = 5)
+    method = LogisticRegression(penalty = "l1", C = 3.5)
 
     n_passes = 10039
     

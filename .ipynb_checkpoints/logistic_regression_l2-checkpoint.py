@@ -21,7 +21,7 @@ from sklearn.model_selection import GridSearchCV
 
 def regression_logistique_l2 (nbiter, train_proportion):
 
-    data = pd.read_csv("dataframe_regression_centre.csv")
+    data = pd.read_csv("dataframe_regression.csv")
     data  = data.sort_values(["passe_id", "receveur_potentiel"]).reset_index().drop(["index"], axis = 1)
     data.drop(["Unnamed: 0"], axis = 1)
 
@@ -38,7 +38,7 @@ def regression_logistique_l2 (nbiter, train_proportion):
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = LogisticRegression(penalty = "l2", C = 2)
+    method = LogisticRegression(penalty = "l2", C = 0.1)
 
     n_passes = 10039
     
