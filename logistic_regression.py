@@ -115,7 +115,7 @@ def regression_logistique (nbiter, train_proportion):
         
     return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
 
-def regression_logistique_OverSamp (nbiter, train_proportion, cchoi, centered=False):
+def regression_logistique_OverSamp (nbiter, train_proportion, centered=False):
     if centered==False:
         data = pd.read_csv("dataframe_regression.csv")
     else:
@@ -136,7 +136,7 @@ def regression_logistique_OverSamp (nbiter, train_proportion, cchoi, centered=Fa
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = LogisticRegression(penalty = "l1", C = cchoi, solver = 'saga')
+    method = LogisticRegression(penalty = "l1", C = 3.5, solver = 'saga')
     
     n_passes = 10039
     
