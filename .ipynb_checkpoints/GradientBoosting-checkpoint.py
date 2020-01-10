@@ -43,7 +43,7 @@ def GradientBoosting (nbiter, train_proportion):
     matrice_coef = np.zeros((nbiter, 9))
     liste_scores = np.zeros(nbiter)
     
-    
+    table=[]
     
     for niter in range (nbiter):
         
@@ -83,8 +83,8 @@ def GradientBoosting (nbiter, train_proportion):
         
         matrice_coef [niter,:] = coef
         
+        table += [pd.crosstab(pred, y_test)]
         
-
         result = proba[:,1]
 
         #on recupere dans prediction_indice les indices des lignes du dataframe test ou il y a la proba max 
@@ -116,8 +116,9 @@ def GradientBoosting (nbiter, train_proportion):
         moyenne_matrice_coef = np.zeros(9)
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
-        
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba
+    moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
+         
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
 
 def GradientBoosting_OverSamp (nbiter, train_proportion, centered=False):
     if centered==False:
@@ -223,4 +224,5 @@ def GradientBoosting_OverSamp (nbiter, train_proportion, centered=False):
         moyenne_matrice_coef = np.zeros(9)
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba
+    moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
