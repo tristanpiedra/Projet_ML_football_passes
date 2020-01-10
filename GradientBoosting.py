@@ -167,7 +167,7 @@ def GradientBoosting_OverSamp (nbiter, train_proportion, centered=False):
         #X_train, X_test, y_train, y_test = train_test_split(data, Y, test_size=0.2, random_state=37)
         from imblearn.over_sampling import SMOTE, ADASYN
         X_resampled, y_resampled = SMOTE().fit_resample(X_train, y_train)
-        print(sorted(Counter(y_resampled).items()))
+        #print(sorted(Counter(y_resampled).items()))
         vect_receveur_potentiel = X_test["receveur_potentiel"]
         vect_vrai_receveur = X_test ["receiver_id"]
 
@@ -182,11 +182,11 @@ def GradientBoosting_OverSamp (nbiter, train_proportion, centered=False):
         X_test = X_test.drop(["receiver_id"], 1)
 
 
-        method = method.fit(X_resampled, y_resampled)
-        proba = method.predict_proba (X_test)
-        pred = method.predict (X_test)
-        score = method.score(X_test, y_test)
-        coef = method.coef_
+        gbopt = method.fit(X_resampled, y_resampled)
+        proba = gbopt.predict_proba (X_test)
+        pred = gbopt.predict (X_test)
+        score = gbopt.score(X_test, y_test)
+        coef = gbopt.feature_importances_
         
         table += [pd.crosstab(pred, y_test)]
         
@@ -223,7 +223,4 @@ def GradientBoosting_OverSamp (nbiter, train_proportion, centered=False):
         moyenne_matrice_coef = np.zeros(9)
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
-    
-    moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
-        
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba

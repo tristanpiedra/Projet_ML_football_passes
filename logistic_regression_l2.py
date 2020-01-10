@@ -167,7 +167,7 @@ def regression_logistique_L2_OverSamp (nbiter, train_proportion, centered=False)
         #X_train, X_test, y_train, y_test = train_test_split(data, Y, test_size=0.2, random_state=37)
         from imblearn.over_sampling import SMOTE, ADASYN
         X_resampled, y_resampled = SMOTE().fit_resample(X_train, y_train)
-        print(sorted(Counter(y_resampled).items()))
+        #print(sorted(Counter(y_resampled).items()))
         vect_receveur_potentiel = X_test["receveur_potentiel"]
         vect_vrai_receveur = X_test ["receiver_id"]
 

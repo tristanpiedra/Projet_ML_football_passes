@@ -115,7 +115,7 @@ def regression_logistique (nbiter, train_proportion):
         
     return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
 
-def regression_logistique_OverSamp (nbiter, train_proportion, centered=False):
+def regression_logistique_OverSamp (nbiter, train_proportion, cchoi, centered=False):
     if centered==False:
         data = pd.read_csv("dataframe_regression.csv")
     else:
@@ -136,7 +136,7 @@ def regression_logistique_OverSamp (nbiter, train_proportion, centered=False):
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = LogisticRegression(penalty = "l1", C = 3.5)
+    method = LogisticRegression(penalty = "l1", C = cchoi, solver = 'saga')
     
     n_passes = 10039
     
@@ -163,7 +163,7 @@ def regression_logistique_OverSamp (nbiter, train_proportion, centered=False):
         #X_train, X_test, y_train, y_test = train_test_split(data, Y, test_size=0.2, random_state=37)
         from imblearn.over_sampling import SMOTE, ADASYN
         X_resampled, y_resampled = SMOTE().fit_resample(X_train, y_train)
-        print(sorted(Counter(y_resampled).items()))
+        #print(sorted(Counter(y_resampled).items()))
         vect_receveur_potentiel = X_test["receveur_potentiel"]
         vect_vrai_receveur = X_test ["receiver_id"]
 
@@ -220,9 +220,9 @@ def regression_logistique_OverSamp (nbiter, train_proportion, centered=False):
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
     
-    moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
+    #moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
         
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba#, moyenne_table
 
 
 
