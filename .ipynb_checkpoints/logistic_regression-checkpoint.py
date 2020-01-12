@@ -220,9 +220,9 @@ def regression_logistique_OverSamp (nbiter, train_proportion, centered=False):
         for i in range(9):
             moyenne_matrice_coef[i] = np.mean(matrice_coef[:,i])
     
-    #moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
+    moyenne_table = (table[0] + table[1] + table[2] + table[3] + table[4] + table[5] + table[6] + table[7] + table[8] + table[9]) / 10
         
-    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba#, moyenne_table
+    return liste_scores, np.mean(liste_scores), matrice_coef, moyenne_matrice_coef, proba, moyenne_table
 
 
 

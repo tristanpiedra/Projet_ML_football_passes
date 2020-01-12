@@ -141,7 +141,7 @@ def GradientBoosting_OverSamp (nbiter, train_proportion, centered=False):
     from sklearn.preprocessing import StandardScaler
 
     #scaler = StandardScaler()
-    method = GradientBoostingClassifier(n_estimators=100, learning_rate = 0.1, max_depth = 3)
+    method = GradientBoostingClassifier(n_estimators=100, learning_rate = 0.05, max_depth = 3)
     
     n_passes = 10039
     
