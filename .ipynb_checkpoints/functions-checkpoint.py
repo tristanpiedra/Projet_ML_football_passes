@@ -14,7 +14,6 @@ def image(dfligne,affichage=False):
     for i in range(15,29):
         if dfligne["x_{}".format(i)]!=100000:
             x,y=int(dfligne["y_{}".format(i)]/10)+340,int(dfligne["x_{}".format(i)]/10)+525
-            print(x,y)
             image[x-5:x+6,y-5:y+6,1]=np.ones((11,11))*255
     sender=int(dfligne['sender_id'])
     x,y=int(dfligne["y_{}".format(sender)]/10)+340,int(dfligne["x_{}".format(sender)]/10)+525
@@ -29,14 +28,17 @@ def image(dfligne,affichage=False):
             XBleu[i-1],YBleu[i-1]=int(dfligne["x_{}".format(i)]),int(dfligne["y_{}".format(i)])
         for i in range(15,29):
             XRouge[i-15],YRouge[i-15]=int(dfligne["x_{}".format(i)]),int(dfligne["y_{}".format(i)])
-        plt.scatter(XBleu, YBleu, color='blue',label="Equipe A")
-        plt.scatter(XRouge, YRouge, color='red',label="Equipe B")
+        plt.scatter(XBleu, YBleu, color='blue',label="Team A")
+        plt.scatter(XRouge, YRouge, color='red',label="Team B")
+        plt.scatter(int(dfligne["x_{}".format(sender)]),int(dfligne["y_{}".format(sender)]),color='green',label="Sender")
         plt.xlim (xmin, xmax)
         plt.ylim (ymin, ymax)
         plt.legend()
+        plt.savefig('Terrain.jpg')
         plt.show()
     return(np.flip(image,axis=0))        
-        
+
+
 
 
 
